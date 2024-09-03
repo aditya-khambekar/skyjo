@@ -261,6 +261,44 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        
+    }
+
+    public void endTurn(){
+        if(players.get(1)==roundTrigger){
+            roundState = "Ended";
+            gameState = "Between";
+            instructions = "Click to reveal cards";
+            players.add(players.removeFirst());
+        }else{
+            if(roundTrigger==null&&ap().faceups()==ap().all().size()){
+                roundTrigger = ap();
+            }
+            players.add(players.removeFirst());
+            roundState = "Take card";
+            instructions = "Take a card";
+        }
+        
+        
+        periodic();
+    }
+
+    public Boolean allFlippedTwo(){
+        for(Player p:players){
+            if(p.faceups()!=2){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
         if(gameState == "Ended"){
@@ -374,44 +412,6 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
             startRound();
         }
         periodic();
-    }
-
-    public void endTurn(){
-        if(players.get(1)==roundTrigger){
-            roundState = "Ended";
-            gameState = "Between";
-            instructions = "Click to reveal cards";
-            players.add(players.removeFirst());
-        }else{
-            if(roundTrigger==null&&ap().faceups()==ap().all().size()){
-                roundTrigger = ap();
-            }
-            players.add(players.removeFirst());
-            roundState = "Take card";
-            instructions = "Take a card";
-        }
-        
-        
-        periodic();
-    }
-
-    public Boolean allFlippedTwo(){
-        for(Player p:players){
-            if(p.faceups()!=2){
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        
     }
 
     @Override
