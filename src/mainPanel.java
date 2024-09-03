@@ -50,7 +50,7 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
 
     Player roundTrigger = null;
 
-    
+    Boolean flipped = false;
 
     Card held = null;
 
@@ -133,6 +133,22 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
         if(moving!=null){
             moving.draw(g);
         }
+        ArrayList<Player> scoreOrder = new ArrayList<Player>();
+        for(int i = 0; i<players.size(); i++){
+            scoreOrder.add(new Player(-1));
+        }
+        Collections.copy(scoreOrder, players);
+        Player.overall = true;
+        Collections.sort(scoreOrder);
+        Player.overall = false;
+
+        int scorex = 1300;
+        int scorey = 40;
+
+        for(Player p:scoreOrder){
+            g.drawString(p.toString()+" - "+p.getTotalScore()+" ["+p.getRoundScore()+"]", scorex, scorey+=20);
+        }
+
         }else{
             try {
                 g.drawImage(ImageIO.read(mainPanel.class.getResource("startbkg.png")), 0, 0, 1585, 961, null);
@@ -143,7 +159,6 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
         }
         paintComponents(g);
         //g.fillRect(mousex + 10, mousey + 10, 10, 10);
-
         
     }
 
@@ -164,9 +179,41 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
         }
 
         discard.add(deck.remove());
-        gameState = "Round 1";
+        gameState = "Round";
         roundState = "TakeTwo";
         instructions = "Choose two cards to flip over";
+    }
+
+    public void startRound(){
+        ArrayList<Card> cards = createCards();
+        for(Player p:players){
+            p.addCards(cards);
+        }       
+        deck = new LinkedList<Card>();
+        while(cards.size()>0){
+            deck.add(cards.removeFirst());
+        }
+        discard = new Stack<Card>();
+        discard.add(deck.remove());
+        gameState = "Round";
+        roundState = "Take card";
+        instructions = "Take a card";
+        flipped = false;
+        while(players.get(0)!=roundTrigger){
+            players.add(players.removeFirst());
+        }
+        roundTrigger = null;
+
+        for(Player p:players){
+            if(p.getTotalScore()>=100){
+                gameState = "Ended";
+                instructions = "Game Ended";
+                break;
+            }
+        }
+        if(gameState=="Ended"){
+            discard.peek().facedown = true;
+        }
     }
 
     public ArrayList<Card> createCards(){
@@ -216,7 +263,10 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
     public void mouseClicked(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        if(roundState.equals("TakeTwo")){
+        if(gameState == "Ended"){
+
+        }
+        else if(roundState.equals("TakeTwo")){
             if(instructions=="Click anywhere to go to next player"){
                 players.add(players.remove(0));
                 instructions = "Choose two cards to flip over";
@@ -297,20 +347,50 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
                 instructions = "Select a card to flip over";
                 placed = true;
             }
+        }else if(roundState == "Ended"){
+            
+            if(!flipped){
+                for(Card c:ap().all()){
+                    c.facedown = false;
+                }
+                instructions = "Click to advance";
+            }else{
+                instructions = "Click to reveal cards";
+                if(players.get(1)==roundTrigger){
+                    roundState = "Ready";
+                    instructions = "Click to start new round";
+                }
+                players.add(players.removeFirst());
+            }
+            flipped = !flipped;
+        }else if(roundState == "Ready"){
+            for(Player p:players){
+                if(p!=roundTrigger&&p.getRoundScore()<=roundTrigger.getRoundScore()){
+                    roundTrigger.Double();
+                }
+            }for(Player p:players){
+                p.newRound();
+            }
+            startRound();
         }
         periodic();
     }
 
     public void endTurn(){
         if(players.get(1)==roundTrigger){
-            throw new UnsupportedOperationException("End Round");
+            roundState = "Ended";
+            gameState = "Between";
+            instructions = "Click to reveal cards";
+            players.add(players.removeFirst());
+        }else{
+            if(roundTrigger==null&&ap().faceups()==ap().all().size()){
+                roundTrigger = ap();
+            }
+            players.add(players.removeFirst());
+            roundState = "Take card";
+            instructions = "Take a card";
         }
-        if(ap().faceups()==ap().all().size()){
-            roundTrigger = ap();
-        }
-        players.add(players.removeFirst());
-        roundState = "Take card";
-        instructions = "Take a card";
+        
         
         periodic();
     }

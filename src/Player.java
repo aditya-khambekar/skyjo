@@ -6,6 +6,8 @@ public class Player implements Comparable<Player>{
     public int num;
     public int score;
 
+    public static Boolean overall = false;
+
     public Player(int number){
         num = number;
     }
@@ -63,8 +65,26 @@ public class Player implements Comparable<Player>{
         }
     }
 
+    public int getTotalScore(){
+        return score + getRoundScore();
+    }
+
+    public void Double(){
+        if(getRoundScore()<0){
+            score += getRoundScore();
+        }
+    }
+
+    public void newRound(){
+        score = getTotalScore();
+        cards = new ArrayList<ArrayList<Card>>();
+    }
+
     @Override
     public int compareTo(Player o) {
+        if(overall){
+            return getTotalScore() - o.getTotalScore();
+        }
         return getRoundScore() - o.getRoundScore();
     }
 
