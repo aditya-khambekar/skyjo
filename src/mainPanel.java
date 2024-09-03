@@ -384,6 +384,12 @@ public class mainPanel extends JPanel implements MouseListener, KeyListener, Act
                 release();
                 instructions = "Select a card to flip over";
                 placed = true;
+                if(ap().hasThree()!=-1){
+                    ArrayList<Card> sendToDiscard = ap().cards.remove(ap().hasThree());
+                    for(Card ca:sendToDiscard){
+                        moveToDiscard(ca);
+                    }
+                }
             }
         }else if(roundState == "Ended"){
             

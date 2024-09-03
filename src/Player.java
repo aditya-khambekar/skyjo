@@ -48,19 +48,26 @@ public class Player implements Comparable<Player>{
     public int getRoundScore(){
         int i = 0;
         for(Card c:all()){
-            if(!c.facedown){
-                i += c.number;
+            try {
+                if(!c.facedown){
+                    i += c.number;
+                }
+            } catch (Exception e) {
+                // TODO: handle exception
             }
         }
         return i;
     }
 
     public void addCard(Card incoming, Card outgoing){
-        for(ArrayList<Card> x:cards){
-            for(Card c:x){
-                if(c==outgoing){
-                    x.set(x.indexOf(outgoing), incoming);
+        if(incoming!=null){
+            for(ArrayList<Card> x:cards){
+                for(Card c:x){
+                    if(c==outgoing){
+                        x.set(x.indexOf(outgoing), incoming);
+                    }
                 }
+            
             }
         }
     }
@@ -70,7 +77,7 @@ public class Player implements Comparable<Player>{
     }
 
     public void Double(){
-        if(getRoundScore()<0){
+        if(getRoundScore()>0){
             score += getRoundScore();
         }
     }
